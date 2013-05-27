@@ -63,7 +63,7 @@ def itml_alg(C, X, A0, params = {}):
         v = X[i1, :] - X[i2, :]
         V = np.asmatrix(v) # must be matrix interactive
         V = V.T 	   # make into column vector
-        wtw = np.asarray(V.T * A * V)[0][0] # should be scalar
+        wtw = (V.T * A * V)[0, 0] # should be scalar
 
         if np.abs(bhat[i]) < 10e-10:
             print('bhat should never be 0!')

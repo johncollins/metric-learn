@@ -18,9 +18,6 @@ class EyeAlgorithm(MetricLearningAlgorithm):
     def set_default_parameters(self):
         pass
 
-    def set_parameters(self, **kwargs):
-        pass
-
     def run_algorithm_specific_setup(self):
         pass
 

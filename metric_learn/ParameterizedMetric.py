@@ -17,13 +17,15 @@ class ParameterizedMetric(object):
 
     def __init__(self, A):
         self.A = A
-        self.M = scipy.linalg.sqrtm(A)
+        self.M = scipy.linalg.sqrtm(A).real
 
     def d(self, x, y):
         """
             Use to calculate the distance between two points
         """
-        return np.real(np.sqrt(np.dot(np.dot((x - y), self.A), (x - y))) )
+        x = np.asmatrix(x)
+        y = np.asmatrix(y)
+        return np.sqrt(((x - y) * np.asmatrix(self.A) * (x - y).T) [0, 0])
 
     def get_A(self):
         """

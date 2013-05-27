@@ -10,47 +10,50 @@
 
 import scipy.linalg
 from ParameterizedMetric import ParameterizedMetric
+from abc import ABCMeta, abstractmethod
+import numpy as np
 
 class MetricLearningAlgorithm(object):
     """
         Abstract class capturing everything common among metric learning algorithms.
     """
+    __metaclass__ = ABCMeta
 
     def __init__(self, X, side_information, side_information_type='labels', parameters={}):
         self.X = X
-        self.y = side_information
+        self.y = np.array(side_information).squeeze()
         self.run_setup(parameters=parameters)
         self.learned_metric = ParameterizedMetric(self.learn_metric())
 
     def run_setup(self, parameters={}):
-        if parameters is None:
-            self.set_default_parameters()
-        else:
+        self.set_default_parameters()
+        if parameters != {}:
             self.set_parameters(parameters=parameters)
         self.run_algorithm_specific_setup()
 
-    @property
+    @abstractmethod
     def set_default_parameters(self):
         """
             Sensible defaults for the algorithm
         """
         raise NotImplementedError('Not Implemented')
 
-    @property
-    def set_parameters(self, **kwargs):
+    def set_parameters(self, parameters):
         """
-            Customize the parameters
+            Set any customizable parameters specified
         """
-        raise NotImplementedError('Not Implemented')
+        for (key, value) in parameters.items():
+            if key in self.parameters:
+                self.parameters[key] = value
 
-    @property 
-    def algorithm_specific_setup(self):
+    @abstractmethod
+    def run_algorithm_specific_setup(self):
         """
             Create any other variables necessary for the algorithm
         """
         raise NotImplementedError('Not Implemented')
 
-    @property
+    @abstractmethod
     def learn_metric(self):
         """
             Actual meat of the algorithm.
