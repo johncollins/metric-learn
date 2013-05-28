@@ -1,4 +1,8 @@
-from distutils.core import setup
+# setup.py
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 # Create the setup dict
 setup_args = {
