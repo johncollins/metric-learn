@@ -20,8 +20,10 @@ class MetricLearningAlgorithm(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, X, side_information, side_information_type='labels', parameters={}):
-        self.X = X
-        self.y = np.array(side_information).squeeze()
+        self.X = np.array(X)
+        #TODO: If X is a data frame or some other useful type, extract its useful info
+        self.y = np.array(side_information).squeeze() 
+        #TODO: assuming labels for now. Change this. Maybe it's own abstraction
         self.run_setup(parameters=parameters)
         self.learned_metric = ParameterizedMetric(self.learn_metric())
 

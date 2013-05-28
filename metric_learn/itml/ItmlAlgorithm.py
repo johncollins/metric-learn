@@ -44,12 +44,13 @@ class ItmlAlgorithm(MetricLearningAlgorithm):
             'beta' : 1.0,
             'constant_factor' : 40.0,
             'type4_rank' : 5.0,
-            'thresh' : 10e-3,
+            'thresh' : 10e-5,
             'k' : 4,
             'max_iters' : 100000,
             'lower_percentile': 5,
             'upper_percentile': 95,
-            'A0': np.eye(self.X.shape[1])
+            'A0': np.eye(self.X.shape[1]),
+            'verbose': True
         }
 
     def run_algorithm_specific_setup(self):
@@ -85,7 +86,8 @@ class ItmlAlgorithm(MetricLearningAlgorithm):
         lambdaold = np.array(lambdacurrent)
         converged = np.inf
         A = np.matrix(self.A0)
-        
+        verbose = self.parameters['verbose']
+
         while True:
             V = np.asmatrix(X[C[i, 0], :] - X[C[i, 1], :]).T # column vector x - y
             wtw = (V.T * A * V)[0, 0] # a scalar
@@ -112,7 +114,6 @@ class ItmlAlgorithm(MetricLearningAlgorithm):
             
             A += beta * A * (V * V.T) * A # non-numba version
             # A = update(A, V, beta) # numba version not working
-            
             if i == c - 1:
                 normsum = np.linalg.norm(lambdacurrent) + np.linalg.norm(lambdaold)
                 if normsum == 0:
@@ -124,10 +125,11 @@ class ItmlAlgorithm(MetricLearningAlgorithm):
                 lambdaold = np.array(lambdacurrent)
             i = ((i+1) % c)
             iteration += 1
-            if iteration % 5000 == 0:       
+            if iteration % 5000 == 0 and verbose:       
                 print('itml iter: %d, converged = %f' % (iteration, converged))
 
-        print('itml converged to tol: %f, iteration: %d' % (converged, iteration))
+        if verbose:
+            print('itml converged to tol: %f, iteration: %d' % (converged, iteration))
         return np.asarray(A)
 
     """
@@ -139,19 +141,3 @@ class ItmlAlgorithm(MetricLearningAlgorithm):
     def update2(A, V, beta):
         return A + beta * A * (V * V.T) * A    
     """
-
-if __name__ == "__main__":
-    from sklearn.metrics import silhouette_score
-    X1 = np.random.normal(0, 1, (100, 15))
-    X2 = np.random.normal(1, 1, (100, 15))
-    X = np.concatenate((X1, X2), axis=0)
-    y1 = np.ones((1, 100))
-    y2 = np.zeros((1, 100))
-    y = np.concatenate((y1, y2), axis=1)
-    itml_alg = ItmlAlgorithm(X, y, parameters = {'constant_factor': 1})
-    metric = itml_alg.get_metric()
-    tX = metric.transform_space(X)
-    S = silhouette_score(X, y.squeeze())
-    St = silhouette_score(tX, y.squeeze())
-    # using a metric learning alg should improve 
-    assert(S <= St)
